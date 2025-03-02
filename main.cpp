@@ -1,7 +1,13 @@
-// create a sample program that uses the class
-#include <iostream>
+#include <brpc/server.h>
 
 int main() {
-    std::cout << "Hello, World!" << std::endl;
-    return 0;
+  brpc::Server server;
+
+  brpc::ServerOptions options;
+  if (server.Start(8000, &options) != 0) {
+    LOG(ERROR) << "服务启动失败";
+    return -1;
+  }
+  server.RunUntilAskedToQuit();
+  return 0;
 }
