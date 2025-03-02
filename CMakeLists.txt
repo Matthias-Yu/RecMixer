@@ -33,13 +33,6 @@ include(FindProtobuf)
 # include PROTO_HEADER
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-# Search for libthrift* by best effort. If it is not found and brpc is
-# compiled with thrift protocol enabled, a link error would be reported.
-# find_library(THRIFT_LIB NAMES thrift)
-# if (NOT THRIFT_LIB)
-#     set(THRIFT_LIB "")
-# endif()
-
 find_path(BRPC_INCLUDE_PATH NAMES brpc/server.h)
 if(LINK_SO)
     find_library(BRPC_LIB NAMES brpc)
@@ -58,16 +51,6 @@ if((NOT GFLAGS_INCLUDE_PATH) OR (NOT GFLAGS_LIBRARY))
 endif()
 include_directories(${GFLAGS_INCLUDE_PATH})
 
-# if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-#     include(CheckFunctionExists)
-#     CHECK_FUNCTION_EXISTS(clock_gettime HAVE_CLOCK_GETTIME)
-#     if(NOT HAVE_CLOCK_GETTIME)
-#         set(DEFINE_CLOCK_GETTIME "-DNO_CLOCK_GETTIME_IN_MAC")
-#     endif()
-# endif()
-
-set(CMAKE_CXX_FLAGS "${DEFINE_CLOCK_GETTIME} -DNDEBUG -O2 -D__const__=__unused__ -pipe -W -Wall -Wno-unused-parameter -fPIC -fno-omit-frame-pointer")
-
 if(CMAKE_VERSION VERSION_LESS "3.1.3")
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
@@ -80,21 +63,12 @@ else()
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
 endif()
 
-# find_path(LEVELDB_INCLUDE_PATH NAMES leveldb/db.h)
-# find_library(LEVELDB_LIB NAMES leveldb)
-# if ((NOT LEVELDB_INCLUDE_PATH) OR (NOT LEVELDB_LIB))
-#     message(FATAL_ERROR "Fail to find leveldb")
-# endif()
-# include_directories(${LEVELDB_INCLUDE_PATH})
-
-# if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-#     set(OPENSSL_ROOT_DIR
-#         "/usr/local/opt/openssl"    # Homebrew installed OpenSSL
-#         )
-# endif()
-
-find_package(OpenSSL)
-include_directories(${OPENSSL_INCLUDE_DIR})
+find_path(LEVELDB_INCLUDE_PATH NAMES leveldb/db.h)
+find_library(LEVELDB_LIB NAMES leveldb)
+if ((NOT LEVELDB_INCLUDE_PATH) OR (NOT LEVELDB_LIB))
+    message(FATAL_ERROR "Fail to find leveldb")
+endif()
+include_directories(${LEVELDB_INCLUDE_PATH})
 
 set(DYNAMIC_LIB
     ${CMAKE_THREAD_LIBS_INIT}
@@ -106,24 +80,6 @@ set(DYNAMIC_LIB
     ${THRIFT_LIB}
     dl
     )
-
-if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    set(DYNAMIC_LIB ${DYNAMIC_LIB}
-        pthread
-        "-framework CoreFoundation"
-        "-framework CoreGraphics"
-        "-framework CoreData"
-        "-framework CoreText"
-        "-framework Security"
-        "-framework Foundation"
-        "-Wl,-U,_MallocExtension_ReleaseFreeMemory"
-        "-Wl,-U,_ProfilerStart"
-        "-Wl,-U,_ProfilerStop"
-        "-Wl,-U,__Z13GetStackTracePPvii"
-        "-Wl,-U,_mallctl"
-        "-Wl,-U,_malloc_stats_print"
-    )
-endif()
 
 add_executable(RecMixer main.cpp ${PROTO_SRC} ${PROTO_HEADER})
 
