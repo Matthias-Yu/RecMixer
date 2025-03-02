@@ -27,6 +27,8 @@ execute_process(
 
 set(CMAKE_PREFIX_PATH ${OUTPUT_PATH})
 
+set(CMAKE_CXX_FLAGS "${DEFINE_CLOCK_GETTIME} -DNDEBUG -O2 -D__const__=__unused__ -pipe -W -Wall -Wno-unused-parameter -fPIC -fno-omit-frame-pointer")
+
 include(FindThreads)
 include(FindProtobuf)
 # protobuf_generate_cpp(PROTO_SRC PROTO_HEADER echo.proto)
